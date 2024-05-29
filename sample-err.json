@@ -1,0 +1,12 @@
+{
+  "key": "value",
+  "num": "v",
+  "array": [
+    1,
+    2,
+    3
+  ],
+  "child": {
+    "key": "value"
+  }
+}
