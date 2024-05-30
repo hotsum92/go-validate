@@ -45,7 +45,10 @@ func main() {
 			found = true
 		}
 
-		if IsZero(data) {
+		emptyFields := EmptyFields(data)
+
+		if len(emptyFields) > 0 {
+			fmt.Fprintf(os.Stderr, "Error decoding JSON: %v\n", emptyFields)
 			found = true
 		}
 	}
@@ -78,4 +81,29 @@ func IsZero(val interface{}) bool {
 	}
 
 	return false
+}
+
+func EmptyFields(s interface{}) []string {
+	var emptyFields []string
+
+	structVal := reflect.ValueOf(s)
+	fieldNum := structVal.NumField()
+	structType := reflect.TypeOf(s)
+
+	for i := 0; i < fieldNum; i++ {
+		field := structVal.Field(i)
+		fieldName := structType.Field(i).Name
+
+		isSet := field.IsValid() && !field.IsZero()
+
+		if !isSet {
+			emptyFields = append(emptyFields, fieldName)
+		}
+
+		if field.Kind() == reflect.Struct {
+			emptyFields = append(emptyFields, EmptyFields(field.Interface())...)
+		}
+	}
+
+	return emptyFields
 }
